@@ -21,8 +21,8 @@ function Main() {
                     alignItems: 'center',
                 }}
             >
-                <div className="demo-logo" />
-                {/* <Menu
+                {/* <div className="demo-logo" />
+                <Menu
                     theme="dark"
                     mode="horizontal"
                     // defaultSelectedKeys={['2']}
@@ -63,7 +63,7 @@ function Main() {
                     textAlign: 'center',
                 }}
             >
-                Ant Design ©{new Date().getFullYear()} Created by Ant UED
+                ©2024 Created by Information Technology Department - Haier Electric (Thailand) PCL 
             </Footer>
         </Layout>
     )

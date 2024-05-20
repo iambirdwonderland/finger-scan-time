@@ -1,15 +1,15 @@
 import React, { useState } from 'react'
 import {
     Button,
+    Flex,
     Form,
     Input,
     Select,
     Card,
-    Col,
-    Row,
     Checkbox
 } from 'antd';
 import axios from 'axios';
+import { ModalConfirm } from './ModalConfirm';
 
 const formItemLayout = {
     labelCol: {
@@ -33,6 +33,17 @@ const formItemLayout = {
 const { Option } = Select;
 
 function Register() {
+
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const handleOpenModal = () => {
+        console.log(formData);
+        if (optionsMessageFrom) {
+            setIsModalOpen(true);
+        }
+    };
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
 
     const [optionsMessageFrom, setOptionsMessageFrom] = useState('');
     const [optionsMessageType, setOptionsMessageType] = useState([]);
@@ -71,7 +82,7 @@ function Register() {
     };
 
     // Data form
-    const [formData, setFormData] = useState({
+    const initialFormData = {
         sendEmpId: '',
         sendEmpName: '',
         sendCode: '',
@@ -86,7 +97,13 @@ function Register() {
         sendSaturday: 0,
         sendSunday: 0,
         sendDesc: ''
-    });
+    };
+    const [formData, setFormData] = useState(initialFormData);
+    const handleCancel = () => {
+        // setFormData(initialFormData);
+        window.location.reload();
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -131,7 +148,7 @@ function Register() {
 
         event.preventDefault(); // ป้องกันการโหลดหน้าใหม่เมื่อกด Submit ใน form
 
-        if (optionsMessageFrom) {
+        if (formData != null) {
 
             try {
                 // let responsesData = "";
@@ -147,7 +164,6 @@ function Register() {
                             sendDesc: desc[0]
                         });
                         console.log('Response:', response.data);
-                        // responsesData += response.data
                     });
                 }
                 if (optionsMessageFrom === 'summary') {
@@ -161,11 +177,9 @@ function Register() {
                             sendDesc: desc[0]
                         });
                         console.log('Response:', response.data);
-                        // responsesData += response.data
                     });
                 }
-                // console.log('Response:', response.data);
-                // window.alert(responsesData);
+                setIsModalOpen(false);
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -176,201 +190,214 @@ function Register() {
     };
 
     return (
+        <Card
+            title="HTC Finger scan time - Line App"
+        >
+            <Form
+                {...formItemLayout}
+                variant="filled"
+                style={{
+                    maxWidth: 1600,
+                }}
+            >
+                <Form.Item
+                    label="Employee ID"
+                    name="empId"
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Please input!',
+                        },
+                    ]}
+                >
+                    <Input type="text" name="sendEmpId" value={formData.sendEmpId} onChange={handleChange} placeholder="Employee ID"/>
+                </Form.Item>
 
-        <Row gutter={16}>
-            <Col span={16}>
-                <Card title="HTC Finger scan time - Line App">
-                    <Form
-                        {...formItemLayout}
-                        variant="filled"
-                        style={{
-                            maxWidth: 600,
-                        }}
+                <Form.Item
+                    label="Employee Name"
+                    name="empName"
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Please input!',
+                        },
+                    ]}
+                >
+                    <Input type="text" name="sendEmpName" value={formData.sendEmpName} onChange={handleChange} placeholder="Employee Name"/>
+                </Form.Item>
+
+                <Form.Item
+                    label="Line Token"
+                    name="lineToken"
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Please input!',
+                        },
+                    ]}
+                >
+                    <Input type="text" name="sendToken" value={formData.sendToken} onChange={handleChange} placeholder="Line Token"/>
+                </Form.Item>
+
+                <Form.Item
+                    label="Send Form"
+                    name="sendForm"
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Please select an option!',
+                        },
+                    ]}
+                >
+                    <Select
+                        placeholder="Select an option"
+                        value={optionsMessageFrom}
+                        onChange={handleSelectChangeForm}
                     >
-                        <Form.Item
-                            label="Employee Id"
-                            name="empId"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Please input!',
-                                },
-                            ]}
+                        <Option value={"detail"}>Time by person</Option>
+                        <Option value={"summary"}>Summary by scan/all</Option>
+                    </Select>
+                </Form.Item>
+
+                <Form.Item
+                    label="Send Type"
+                    name="sendType"
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Please select an option!',
+                        },
+                    ]}
+                >
+                    <Select
+                        placeholder="Select an option"
+                        value={formData.sendType}
+                        onChange={handleSelectChangeType}
+                    >
+                        {optionsMessageType.map(option => (
+                            <Option key={option.id} value={option.id}>{option.name}</Option>
+                        ))}
+                    </Select>
+                </Form.Item>
+
+                <Form.Item
+                    label="Send Desc"
+                    name="sendCode"
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Please select an option!',
+                        },
+                    ]}
+                >
+                    <Select
+                        mode="multiple"
+                        placeholder="Select an option"
+                        loading={loading}
+                        onClick={fetchDataOptions}
+                        value={formData.sendCode}
+                        onChange={handleSelectChangeDesc}
+                    >
+                        {options.map(option => (
+                            <Option key={option.id} value={option.id}>
+                                {option.name}
+                            </Option>
+                        ))}
+
+                    </Select>
+                </Form.Item>
+
+                <Form.Item
+                    label="Days of workday"
+                >
+
+                    <Checkbox
+                        checked={formData.sendMonday}
+                        onChange={() => handleCheckboxChange("sendMonday")}
+                    >
+                        Monday
+                    </Checkbox>
+
+                    <Checkbox
+                        checked={formData.sendTuesday}
+                        onChange={() => handleCheckboxChange("sendTuesday")}
+                    >
+                        Tuesday
+                    </Checkbox>
+
+                    <Checkbox
+                        checked={formData.sendWednesday}
+                        onChange={() => handleCheckboxChange("sendWednesday")}
+                    >
+                        Wednesday
+                    </Checkbox>
+
+                    <Checkbox
+                        checked={formData.sendThursday}
+                        onChange={() => handleCheckboxChange("sendThursday")}
+                    >
+                        Thursday
+                    </Checkbox>
+
+                    <Checkbox
+                        checked={formData.sendFriday}
+                        onChange={() => handleCheckboxChange("sendFriday")}
+                    >
+                        Friday
+                    </Checkbox>
+                </Form.Item>
+
+                <Form.Item
+                    label="Days of weekend"
+                >
+                    <Checkbox
+                        checked={formData.sendSaturday}
+                        onChange={() => handleCheckboxChange("sendSaturday")}
+                    >
+                        Saturday
+                    </Checkbox>
+
+                    <Checkbox
+                        checked={formData.sendSunday}
+                        onChange={() => handleCheckboxChange("sendSunday")}
+                    >
+                        Sunday
+                    </Checkbox>
+                </Form.Item>
+
+                <Form.Item
+                    wrapperCol={{
+                        offset: 6,
+                        span: 16,
+                    }}
+                >
+                    <Flex 
+                        gap="small" 
+                    >
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            onClick={handleOpenModal}
                         >
-                            <Input type="text" name="sendEmpId" value={formData.sendEmpId} onChange={handleChange} />
-                        </Form.Item>
+                            Submit
+                        </Button>
 
-                        <Form.Item
-                            label="Employee Name"
-                            name="empName"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Please input!',
-                                },
-                            ]}
+                        <Button
+                            onClick={handleCancel}
                         >
-                            <Input type="text" name="sendEmpName" value={formData.sendEmpName} onChange={handleChange} />
-                        </Form.Item>
+                            Cancel
 
-                        <Form.Item
-                            label="Line Token"
-                            name="lineToken"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Please input!',
-                                },
-                            ]}
-                        >
-                            <Input type="text" name="sendToken" value={formData.sendToken} onChange={handleChange} />
-                        </Form.Item>
+                        </Button>
+                    </Flex>
+                </Form.Item>
 
-                        <Form.Item
-                            label="Send Form"
-                            name="sendForm"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Please input!',
-                                },
-                            ]}
-                        >
-                            <Select
-                                placeholder="Select an option"
-                                value={optionsMessageFrom}
-                                onChange={handleSelectChangeForm}
-                            >
-                                <Option value={"detail"}>Time by person</Option>
-                                <Option value={"summary"}>Summary by scan/all</Option>
-                            </Select>
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Send Type"
-                            name="sendType"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Please input!',
-                                },
-                            ]}
-                        >
-                            <Select
-                                placeholder="Select an option"
-                                value={formData.sendType}
-                                onChange={handleSelectChangeType}
-                            >
-                                {optionsMessageType.map(option => (
-                                    <Option key={option.id} value={option.id}>{option.name}</Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Send Desc"
-                            name="sendCode"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Please input!',
-                                },
-                            ]}
-                        >
-                            <Select
-                                mode="multiple"
-                                placeholder="Select an option"
-                                loading={loading}
-                                onClick={fetchDataOptions}
-
-                                value={formData.sendCode}
-                                // value={optionsMessageDesc}
-                                onChange={handleSelectChangeDesc}
-                            >
-                                {options.map(option => (
-                                    <Option key={option.id} value={option.id}>
-                                        {option.name}
-                                    </Option>
-                                ))}
-
-                            </Select>
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Days of workday"
-                        // value={formData}
-                        >
-
-                            <Checkbox
-                                checked={formData.sendMonday}
-                                onChange={() => handleCheckboxChange("sendMonday")}
-                            >
-                                Monday
-                            </Checkbox>
-
-                            <Checkbox
-                                checked={formData.sendTuesday}
-                                onChange={() => handleCheckboxChange("sendTuesday")}
-                            >
-                                Tuesday
-                            </Checkbox>
-
-                            <Checkbox
-                                checked={formData.sendWednesday}
-                                onChange={() => handleCheckboxChange("sendWednesday")}
-                            >
-                                Wednesday
-                            </Checkbox>
-
-                            <Checkbox
-                                checked={formData.sendThursday}
-                                onChange={() => handleCheckboxChange("sendThursday")}
-                            >
-                                Thursday
-                            </Checkbox>
-
-                            <Checkbox
-                                checked={formData.sendFriday}
-                                onChange={() => handleCheckboxChange("sendFriday")}
-                            >
-                                Friday
-                            </Checkbox>
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Days of weekend"
-                        >
-                            <Checkbox
-                                checked={formData.sendSaturday}
-                                onChange={() => handleCheckboxChange("sendSaturday")}
-                            >
-                                Saturday
-                            </Checkbox>
-
-                            <Checkbox
-                                checked={formData.sendSunday}
-                                onChange={() => handleCheckboxChange("sendSunday")}
-                            >
-                                Sunday
-                            </Checkbox>
-                        </Form.Item>
-
-                        <Form.Item
-                            wrapperCol={{
-                                offset: 6,
-                                span: 16,
-                            }}
-                        >
-                            <Button type="primary" htmlType="submit" onClick={handleSubmit}>
-                                Submit
-                            </Button>
-                        </Form.Item>
-
-                    </Form>
-                </Card>
-            </Col>
-        </Row>
-
+                <ModalConfirm
+                    isOpen={isModalOpen}
+                    isConfirm={handleSubmit}
+                    isCloseModal={handleCloseModal}
+                />
+            </Form>
+        </Card>
     )
 }
 
