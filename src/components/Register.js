@@ -1,4 +1,7 @@
 import React, { useState } from 'react'
+import axios from 'axios';
+import { ModalConfirm } from './ModalConfirm';
+import { ExclamationCircleTwoTone, CheckCircleTwoTone } from '@ant-design/icons';
 import {
     Button,
     Flex,
@@ -8,8 +11,7 @@ import {
     Card,
     Checkbox
 } from 'antd';
-import axios from 'axios';
-import { ModalConfirm } from './ModalConfirm';
+import { ModalResponse } from './ModalResponse';
 
 const formItemLayout = {
     labelCol: {
@@ -34,6 +36,7 @@ const { Option } = Select;
 
 function Register() {
 
+
     const [isModalOpen, setIsModalOpen] = useState(false)
     const handleOpenModal = () => {
         console.log(formData);
@@ -43,6 +46,13 @@ function Register() {
     };
     const handleCloseModal = () => {
         setIsModalOpen(false);
+    };
+
+    const [isDataResponse, setIsDataResponse] = useState("")
+    const [isModalOpenResponse, setIsModalOpenResponse] = useState(false)
+    const handleCloseModalResponse = () => {
+        setIsModalOpenResponse(false);
+        window.location.reload();
     };
 
     const [optionsMessageFrom, setOptionsMessageFrom] = useState('');
@@ -100,7 +110,7 @@ function Register() {
     };
     const [formData, setFormData] = useState(initialFormData);
     const handleCancel = () => {
-        // setFormData(initialFormData);
+        setFormData(initialFormData);
         window.location.reload();
     };
 
@@ -143,6 +153,7 @@ function Register() {
         }));
     };
 
+    const [resIcon, setResIcon] = useState("");
     // Submit Form
     const handleSubmit = async (event) => {
 
@@ -151,35 +162,90 @@ function Register() {
         if (formData != null) {
 
             try {
-                // let responsesData = "";
+
+                let data = '';
                 let response;
                 if (optionsMessageFrom === 'detail') {
-                    // response = await axios.post('http://10.35.10.47:2003/api/FingerScanTime/LineTokenDetail/AddDetail', formData);
-
-                    formData.sendCode.forEach(async code => {
+                    // สร้างลูปแบบ async ด้วย for...of
+                    for (const code of formData.sendCode) {
                         const desc = options.filter(option => code.includes(option.id)).map(option => option.name);
-                        response = await axios.post('http://10.35.10.47:2003/api/FingerScanTime/LineTokenDetail/AddDetail', {
-                            ...formData,
-                            sendCode: code, // ใช้ค่า sendCode ในแต่ละรอบของลูป
-                            sendDesc: desc[0]
-                        });
-                        console.log('Response:', response.data);
-                    });
+                        try {
+                            response = await axios.post('http://10.35.10.47:2003/api/FingerScanTime/LineTokenDetail/AddDetail', {
+                                ...formData,
+                                sendCode: code, // ใช้ค่า sendCode ในแต่ละรอบของลูป
+                                sendDesc: desc[0]
+                            });
+                            if (response.data.startsWith("Add Detail : Register successfully.")) {
+                                setResIcon(<CheckCircleTwoTone twoToneColor="#52c41a" />);
+                            }
+                            if (response.data === "Add Detail : You have registered before, please check your status.") {
+                                setResIcon(<ExclamationCircleTwoTone twoToneColor="#eba92f" />);
+                            }
+                            console.log('Response:', response.data);
+                            data += response.data + '\n';
+                        } catch (error) {
+                            console.error('Error:', error);
+                        }
+                    }
+                    console.log('All data:', data);
                 }
                 if (optionsMessageFrom === 'summary') {
-                    // response = await axios.post('http://10.35.10.47:2003/api/FingerScanTime/LineTokenSummary/AddSummary', formData);
-
-                    formData.sendCode.forEach(async code => {
+                    // สร้างลูปแบบ async ด้วย for...of
+                    for (const code of formData.sendCode) {
                         const desc = options.filter(option => code.includes(option.id)).map(option => option.name);
-                        response = await axios.post('http://10.35.10.47:2003/api/FingerScanTime/LineTokenSummary/AddSummary', {
-                            ...formData,
-                            sendCode: code, // ใช้ค่า sendCode ในแต่ละรอบของลูป
-                            sendDesc: desc[0]
-                        });
-                        console.log('Response:', response.data);
-                    });
+                        try {
+                            response = await axios.post('http://10.35.10.47:2003/api/FingerScanTime/LineTokenSummary/AddSummary', {
+                                ...formData,
+                                sendCode: code, // ใช้ค่า sendCode ในแต่ละรอบของลูป
+                                sendDesc: desc[0]
+                            });
+                            console.log('Response:', response.data);
+                            data += response.data + '\n';
+                        } catch (error) {
+                            console.error('Error:', error);
+                        }
+                    }
+                    console.log('All data:', data);
                 }
+
+                // let data = '';
+                // let response;
+                // if (optionsMessageFrom === 'detail') {
+                //     // response = await axios.post('http://10.35.10.47:2003/api/FingerScanTime/LineTokenDetail/AddDetail', formData);
+                //     formData.sendCode.forEach(async code => {
+                //         const desc = options.filter(option => code.includes(option.id)).map(option => option.name);
+                //         response = await axios.post('http://10.35.10.47:2003/api/FingerScanTime/LineTokenDetail/AddDetail', {
+                //             ...formData,
+                //             sendCode: code, // ใช้ค่า sendCode ในแต่ละรอบของลูป
+                //             sendDesc: desc[0]
+                //         });
+                //         console.log('Response:', response.data);
+                //         setIsDataResponse(response.data);
+                //         data += response.data
+
+                //     });
+                // }
+                // if (optionsMessageFrom === 'summary') {
+                //     // response = await axios.post('http://10.35.10.47:2003/api/FingerScanTime/LineTokenSummary/AddSummary', formData);
+                //     formData.sendCode.forEach(async code => {
+                //         const desc = options.filter(option => code.includes(option.id)).map(option => option.name);
+                //         response = await axios.post('http://10.35.10.47:2003/api/FingerScanTime/LineTokenSummary/AddSummary', {
+                //             ...formData,
+                //             sendCode: code, // ใช้ค่า sendCode ในแต่ละรอบของลูป
+                //             sendDesc: desc[0]
+                //         });
+                //         console.log('Response:', response.data);
+                //         setIsDataResponse(response.data);
+                //         data += response.data
+                //     });
+                // }
+
+                console.log("data: ");
+                console.log(data.trim());
+
+                setIsDataResponse(data);
                 setIsModalOpen(false);
+                setIsModalOpenResponse(true);
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -210,7 +276,7 @@ function Register() {
                         },
                     ]}
                 >
-                    <Input type="text" name="sendEmpId" value={formData.sendEmpId} onChange={handleChange} placeholder="Employee ID"/>
+                    <Input type="text" name="sendEmpId" value={formData.sendEmpId} onChange={handleChange} placeholder="Employee ID" />
                 </Form.Item>
 
                 <Form.Item
@@ -223,7 +289,7 @@ function Register() {
                         },
                     ]}
                 >
-                    <Input type="text" name="sendEmpName" value={formData.sendEmpName} onChange={handleChange} placeholder="Employee Name"/>
+                    <Input type="text" name="sendEmpName" value={formData.sendEmpName} onChange={handleChange} placeholder="Employee Name" />
                 </Form.Item>
 
                 <Form.Item
@@ -236,7 +302,7 @@ function Register() {
                         },
                     ]}
                 >
-                    <Input type="text" name="sendToken" value={formData.sendToken} onChange={handleChange} placeholder="Line Token"/>
+                    <Input type="text" name="sendToken" value={formData.sendToken} onChange={handleChange} placeholder="Line Token" />
                 </Form.Item>
 
                 <Form.Item
@@ -371,8 +437,8 @@ function Register() {
                         span: 16,
                     }}
                 >
-                    <Flex 
-                        gap="small" 
+                    <Flex
+                        gap="small"
                     >
                         <Button
                             type="primary"
@@ -395,6 +461,12 @@ function Register() {
                     isOpen={isModalOpen}
                     isConfirm={handleSubmit}
                     isCloseModal={handleCloseModal}
+                />
+                <ModalResponse
+                    isOpen={isModalOpenResponse}
+                    isCloseModal={handleCloseModalResponse}
+                    isResponse={isDataResponse}
+                    isIcon={resIcon}
                 />
             </Form>
         </Card>

@@ -1,19 +1,20 @@
 import React from 'react'
 import { Modal } from 'antd'
 
-export const ModalConfirm = ({ 
-    isOpen, 
-    isCloseModal,
+export const ModalConfirm = ({
+    isOpen,
     isConfirm,
+    isCloseModal,
 }) => {
+
     return (
         <>
             <Modal
                 open={isOpen}
                 onOk={isConfirm}
-                okText = "Confirm"
+                okText="Confirm"
                 onCancel={isCloseModal}
-                title = 'Confirm registration or not ?'
+                title='Confirm registration or not ?'
             ></Modal>
         </>
     )
